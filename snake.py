@@ -1,8 +1,18 @@
+"""
+Author: Michelle Loven github.com/Mishka2
+Date created: July 28, 2019
+Last edited: August 2, 2019
+
+Snake game!
+sudo python snake.py
+"""
+
 import os
 import time
 import keyboard
 import random
 from colorama import Fore, Back, Style
+
 
 class Board():
 
@@ -10,6 +20,12 @@ class Board():
         self.rows = rows
         self.columns = columns
         self.board = []
+
+        self.head_char = 'X'
+        self.body_char = '+'
+        self.food_char = 'O'
+        self.wall_char = '#'
+
         for row_num in range(rows):
             self.board.append([])
 
@@ -17,15 +33,14 @@ class Board():
             for column_num in range(columns):
                 self.board[row_num].append(' ')
 
-
     def set_color(self, item, end):
-        if item == 'X':
+        if item == self.head_char:
             print(Fore.RED + item, end = end)
-        elif item == 'O':
+        elif item == self.food_char:
             print(Fore.GREEN + item, end = end)
-        elif item == '#' or item == '#':
+        elif item == self.wall_char:
             print(Fore.BLUE + item, end = end)
-        elif item == '+':
+        elif item == self.body_char:
             print(Fore.RED + item, end = end)
         else:
             print(Style.RESET_ALL + item, end = end)
@@ -37,13 +52,9 @@ class Board():
             for item in self.board[row]:
                 if counter < self.columns-1:
                     self.set_color(item, " ")
-                    # print(Fore.RED + item, end =" ")
                 else:
                     self.set_color(item, None)
                 counter += 1
-                # print(Style.RESET_ALL)
-
-
 
     def get_board(self):
         return self.board
@@ -58,38 +69,27 @@ class Board():
                     self.board[row_num][index] = ' '
 
     def apply_snake(self, snake, game):
-        # print("Body points: " + str(snake.get_body_points()))
         if(self.get_board()[snake.get_body_points()[0][0]][snake.get_body_points()[0][1]] == ' '):
-            self.get_board()[snake.get_body_points()[0][0]][snake.get_body_points()[0][1]] = snake.get_head_char()
+            self.get_board()[snake.get_body_points()[0][0]][snake.get_body_points()[0][1]] = self.head_char
             for point_index in range(1,len(snake.get_body_points())):
-                # print("point_index: " + str(point_index))
-                self.get_board()[snake.get_body_points()[point_index][0]][snake.get_body_points()[point_index][1]] = snake.get_body_char()
-        elif(self.get_board()[snake.get_body_points()[0][0]][snake.get_body_points()[0][1]] == 'O'): #the snake hit a piece of food
+                self.get_board()[snake.get_body_points()[point_index][0]][snake.get_body_points()[point_index][1]] = self.body_char
+        elif(self.get_board()[snake.get_body_points()[0][0]][snake.get_body_points()[0][1]] == self.food_char): #the snake hit a piece of food
             snake.add_to_body()
+            game.add_to_score(10)
             game.food = Food([self.get_board_dim()[0]-1, self.get_board_dim()[1]-1])
 
     def apply_food(self, food):
-        # try:
-        # print("error with food: " + str((food.get_coor()[0],food.get_coor()[1])))
-        self.get_board()[food.get_coor()[0]][food.get_coor()[1]] = 'O'
-        # print("ehllo")
-
-        # except:
-
+        self.get_board()[food.get_coor()[0]][food.get_coor()[1]] = self.food_char
 
     def apply_walls(self, walls):
         #walls = ((top, bottom, left, right))
-
         for wall in [walls[2],walls[3]]:
             for point in wall:
-                # print(point)
-                self.get_board()[point[0]][point[1]] = '#'
+                self.get_board()[point[0]][point[1]] = self.wall_char
 
         for wall in [walls[0],walls[1]]:
             for point in wall:
-                # print(point)
-                self.get_board()[point[0]][point[1]] = '#'
-
+                self.get_board()[point[0]][point[1]] = self.wall_char
 
 
 class Snake():
@@ -137,16 +137,8 @@ class Snake():
         for point_index in range(len(new_body)):
             self.body_points[point_index] = new_body[point_index]
 
-
-
     def add_body_point(self, point_coor):
         self.body_points.append(point_coor)
-
-    def get_head_char(self):
-        return self.head_character
-
-    def get_body_char(self):
-        return self.body_character
 
     def get_body_points(self):
         return self.body_points
@@ -160,8 +152,6 @@ class Snake():
     def __init__(self):
         self.initial_head_pos = [2,2]
         self.body_points = [self.initial_head_pos, [self.initial_head_pos[0] -1 , self.initial_head_pos]]
-        self.head_character = 'X'
-        self.body_character = '+'
         self.last_dir = "down"
 
     def add_to_body(self):
@@ -206,7 +196,6 @@ class Food():
         return [x,y]
 
 
-
 class SnakeGame():
 
     def __init__(self, dimx, dimy):
@@ -215,8 +204,35 @@ class SnakeGame():
         self.food = Food(self.board.get_board_dim())
         self.walls = self.make_walls(dimx,dimy)
         self.curr_key = ''
+        self.score = 0
+        self.high_score = 0
+        self.check_highscore_file("highscore.txt")
+        self.check_highscore("highscore.txt")
         self.lose = False
         os.system("clear")
+
+    def check_highscore_file(self, file_name):
+        try:
+            file = open(file_name, 'r')
+            file.close()
+        except:
+            file = open(file_name, 'w+')
+            file.close()
+
+    def refresh_highscore(self, file_name):
+        if self.score > self.high_score:
+            # print("bigger")
+            self.high_score = self.score
+            file = open(file_name, 'w')
+            file.write(str(self.high_score))
+            file.close()
+
+    def check_highscore(self, file_name):
+        file = open(file_name, 'r')
+        file_list = file.readlines()
+        if file_list != []:
+            self.high_score = int(file_list[0])
+        file.close()
 
     def get_food(self):
         return self.food
@@ -227,12 +243,9 @@ class SnakeGame():
     def any_arrow_pressed(self):
         arrows = ["up", "down", "left", "right", "r"]
         pressed = False
-        # print("arrow pressed")
         for arrow in arrows:
-            # print("arrow: " + str(pressed))
             pressed = keyboard.is_pressed(arrow)
             if pressed:
-                # print("second press: " + str(pressed))
                 self.curr_key = arrow
                 return pressed
 
@@ -300,46 +313,46 @@ class SnakeGame():
         else:
             return ' '
 
+    def add_to_score(self, add):
+        self.score += add
+
+    def final_display(self):
+        self.snake.move_snake_head(self.snake.get_curr_dir(),self.board)
+        self.snake.move_snake_body()
+        self.display_game()
 
     def run_game(self):
-        #self.snake.get_last_dir() = "down"
-        time.sleep(.1)
+        time.sleep(.05)
         valid_arrow_press = self.any_arrow_pressed()
         opposite_key = self.get_opposite(self.snake.get_curr_dir())
 
-        #TODO PREVENT snake from moving backwards
-        # if(not valid_arrow_press or self.curr_key == opposite_key):
         if(not valid_arrow_press or self.curr_key == opposite_key or self.snake.get_curr_dir() == self.curr_key):
-            if(self.check_board_dim(self.snake.get_body_points()[0], self.snake.get_curr_dir()) and not self.snake.get_body_points()[0] in self.snake.get_body_points()[1:]):
-                self.snake.move_snake_head(self.snake.get_curr_dir(),self.board)
-                self.snake.move_snake_body()
-                self.display_game()
+            if(self.check_board_dim(self.snake.get_body_points()[0], self.snake.get_curr_dir())
+                and not self.snake.get_body_points()[0] in self.snake.get_body_points()[1:]):
+                self.final_display()
             else: #the snake hits the wall
                 self.lose = True
 
         elif(valid_arrow_press):
             self.snake.set_curr_dir(self.curr_key)
-            if(self.check_board_dim(self.snake.get_body_points()[0], self.snake.get_curr_dir()) and not self.snake.get_body_points()[0] in self.snake.get_body_points()[1:]):
-                self.snake.move_snake_head(self.snake.get_curr_dir(),self.board)
-                self.snake.move_snake_body()
-                self.display_game()
-                # print("Food: " + str(self.food.get_coor()))
+            if(self.check_board_dim(self.snake.get_body_points()[0], self.snake.get_curr_dir())
+                and not self.snake.get_body_points()[0] in self.snake.get_body_points()[1:]):
+                self.final_display()
             else: #the snake hits the wall
                 self.lose = True
 
-        # print("rerun")
+    def display_score(self):
+        print(Fore.MAGENTA + "Score: " + str(self.score))
+        self.refresh_highscore("highscore.txt")
+        # self.get_highscore("highscore.txt")
+        print(Fore.MAGENTA + "Highscore: " + str(self.high_score))
+        print(Style.RESET_ALL)
 
-        if not self.lose:
-            self.run_game()
-        else:
-            print("YOU LOSE!")
 
-# while(True):
-#     if(keyboard.read_key() == 'up'):
-#         print("he")
 if __name__ == '__main__':
-    #rows columns
-    SnakeGame(20,30).run_game()
+    game = SnakeGame(20,30)
+    while(not game.lose):
+        game.display_score()
+        game.run_game()
 
-#
-# print(" ")
+    print("YOU LOSE!")
