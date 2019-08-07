@@ -1,7 +1,7 @@
 """
 Author: Michelle Loven github.com/Mishka2
 Date created: July 28, 2019
-Last edited: August 2, 2019
+Last edited: August 7, 2019
 
 Snake game!
 sudo python snake.py
@@ -69,11 +69,15 @@ class Board():
                     self.board[row_num][index] = ' '
 
     def apply_snake(self, snake, game):
-        if(self.get_board()[snake.get_body_points()[0][0]][snake.get_body_points()[0][1]] == ' '):
-            self.get_board()[snake.get_body_points()[0][0]][snake.get_body_points()[0][1]] = self.head_char
+        snake_x = snake.get_body_points()[0][0]
+        snake_y = snake.get_body_points()[0][1]
+        if(self.get_board()[snake_x][snake_y] == ' '):
+            self.get_board()[snake_x][snake_y] = self.head_char
             for point_index in range(1,len(snake.get_body_points())):
-                self.get_board()[snake.get_body_points()[point_index][0]][snake.get_body_points()[point_index][1]] = self.body_char
-        elif(self.get_board()[snake.get_body_points()[0][0]][snake.get_body_points()[0][1]] == self.food_char): #the snake hit a piece of food
+                x_coor = snake.get_body_points()[point_index][0]
+                y_coor = snake.get_body_points()[point_index][1]
+                self.get_board()[x_coor][y_coor] = self.body_char
+        elif(self.get_board()[snake_x][snake_y] == self.food_char): #the snake hit a piece of food
             snake.add_to_body()
             game.add_to_score(10)
             game.food = Food([self.get_board_dim()[0]-1, self.get_board_dim()[1]-1])
@@ -82,12 +86,8 @@ class Board():
         self.get_board()[food.get_coor()[0]][food.get_coor()[1]] = self.food_char
 
     def apply_walls(self, walls):
-        #walls = ((top, bottom, left, right))
-        for wall in [walls[2],walls[3]]:
-            for point in wall:
-                self.get_board()[point[0]][point[1]] = self.wall_char
-
-        for wall in [walls[0],walls[1]]:
+        #walls = (top, bottom, left, right)
+        for wall in walls:
             for point in wall:
                 self.get_board()[point[0]][point[1]] = self.wall_char
 
