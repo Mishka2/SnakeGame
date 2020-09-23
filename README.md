@@ -3,7 +3,7 @@
 How the game looks: 
 
 <br />
-<div style="align:center"><img src="https://github.com/Mishka2/vibrating_watch/blob/master/display_poster.png" /></div>
+<div style="align:center"><img src="https://github.com/Mishka2/snake_game/blob/master/terminal_snake_picture.png" /></div>
 
 Installations:
 
