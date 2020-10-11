@@ -3,9 +3,9 @@
 ## How the Game Looks: 
 
 <br />
-<div style="align:center; width: 50px"><img src="https://github.com/Mishka2/snake_game/blob/master/UI/snake2.png" /></div>
+<div><img src="https://github.com/Mishka2/snake_game/blob/master/UI/snake2.png" width="500" /></div>
 <br />
-<div style="align:center; width: 50px"><img src="https://github.com/Mishka2/snake_game/blob/master/UI/snake1.png" /></div>
+<div><img src="https://github.com/Mishka2/snake_game/blob/master/UI/snake1.png"  width="500"/></div>
 <br />
 
 ## Installations:
